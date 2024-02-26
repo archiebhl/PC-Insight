@@ -2,6 +2,8 @@
 
 A program to monitor the real-time temperature and usage data of PC components in C#. 
 
+![](https://github.com/axshb/PC-Insight/blob/master/GUI.png?raw=true)
+
 
 ## Instructions
 1. Install NuGet Packages:
