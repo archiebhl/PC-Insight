@@ -42,7 +42,16 @@ namespace PCInsight{
                 IsStorageEnabled = false
             };
 
-            computer.Open();
+            try
+            {
+                computer.Open();
+            }
+            catch (NullReferenceException)
+            {
+                Debug.WriteLine("An exception of type 'System.NullReferenceException' occurred in LibreHardwareMonitorLib.dll");
+                Debug.WriteLine("'Object reference not set to an instance of an object.'");
+            }
+            Debug.Flush();
             computer.Accept(new UpdateVisitor());
 
             foreach (IHardware hardware in computer.Hardware)
