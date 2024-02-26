@@ -6,15 +6,11 @@ A program to monitor the real-time temperature and usage data of PC components i
 
 
 ## Instructions
-1. Install NuGet Packages:
-```
-nuget restore PCInsight.sln
-```
-2. Build:
+1. Build:
 ```
 dotnet build PCInsight.csproj
 ```
-3. Run:
+2. Run:
 ```
 dotnet run PCInsight.csproj
 ```
