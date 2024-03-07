@@ -5,7 +5,7 @@ A program to monitor the real-time temperature and usage data of PC components i
 ![](https://github.com/axshb/PC-Insight/blob/master/GUI.png?raw=true)
 
 
-## Instructions
+## Usage
 1. Build:
 ```
 dotnet build PCInsight.csproj
