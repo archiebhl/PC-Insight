@@ -61,7 +61,7 @@ namespace PCInsight{
 
                     double sensorValue = 0;
                     if (sensor.Value.HasValue){
-                        sensorValue = (double)Math.Round(sensor.Value.Value, 2);
+                        sensorValue = (double)Math.Round(sensor.Value.Value, 0);
                     }
 
                     if (hardware.HardwareType.ToString().Equals("Cpu")){
