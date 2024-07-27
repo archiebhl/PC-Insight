@@ -8,32 +8,56 @@ namespace PCInsight
     public partial class Form1 : Form
     {
         private ResourceMonitor rm = new ResourceMonitor();
-        private Timer updateTimer;
+        private Timer updateTimer = new Timer
+        {
+            Interval = 2000 // 2 second(s)
+        };
         private Plot gpuUsagePlot = new();
         private Plot gpuTemperaturePlot = new();
         private Plot cpuUsagePlot = new();
         private Plot cpuTemperaturePlot = new();
+        private bool pauseTimer = false;
 
         public Form1()
         {
             InitializeComponent();
             InitializePlot();
+            UpdateData(); // first run to gather component info
+        }
+
+        private void StartButton_Click(object sender, EventArgs e)
+        {
             StartUpdateTimer();
+        }
+
+        private void PauseButton_Click(object sender, EventArgs e)
+        {
+            PauseUpdateTimer();
         }
 
         private void StartUpdateTimer()
         {
-            updateTimer = new Timer
+            if (pauseTimer == true)
             {
-                Interval = 2000 // 2 second(s)
-            };
-            updateTimer.Tick += UpdateTimerTick;
-            updateTimer.Start();
+                pauseTimer = false;
+            } else
+            {
+                updateTimer.Tick += UpdateTimerTick;
+                updateTimer.Start();
+            }
+        }
+
+        private void PauseUpdateTimer()
+        {
+            pauseTimer = true;
         }
 
         private void UpdateTimerTick(object? sender, EventArgs e)
-        {
-            UpdateData();
+        {   
+            if (!pauseTimer)
+            {
+                UpdateData();
+            }
         }
 
         private async void UpdateData()
