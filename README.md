@@ -1,6 +1,6 @@
 # PCInsight
 
-A program to monitor the real-time temperature and usage data of PC components in C#. 
+A program to monitor the real-time temperature and usage data of PC components. 
 
 ![](https://github.com/axshb/PC-Insight/blob/master/GUI.png?raw=true)
 
