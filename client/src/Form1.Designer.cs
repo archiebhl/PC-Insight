@@ -1,4 +1,4 @@
-﻿namespace PCInsight
+﻿namespace PCInsight.Client
 {
     partial class Form1
     {
@@ -36,7 +36,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(500, 600);
             this.Text = "PCInsight";
-            this.Icon = new Icon("logo.ico");
+            this.Icon = new Icon("assets/logo.ico");
             this.Controls.Add(this.menuStrip);
             this.MainMenuStrip = this.menuStrip;
             this.ResumeLayout(false);

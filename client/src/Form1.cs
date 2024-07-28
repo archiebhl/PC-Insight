@@ -3,7 +3,7 @@ using SkiaSharp;
 using SkiaSharp.Views.Desktop;
 using Timer = System.Windows.Forms.Timer;
 
-namespace PCInsight
+namespace PCInsight.Client
 {
     public partial class Form1 : Form
     {

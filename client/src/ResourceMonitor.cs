@@ -1,7 +1,7 @@
 using LibreHardwareMonitor.Hardware;
 using System.Diagnostics;
-namespace PCInsight{
-
+namespace PCInsight.Client
+{
     public class UpdateVisitor : IVisitor{
     public void VisitComputer(IComputer computer)
     {
