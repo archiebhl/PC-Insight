@@ -1,4 +1,6 @@
-﻿namespace PCInsight.Client
+﻿using System.Diagnostics.Tracing;
+
+namespace client
 {
     partial class Form1
     {
@@ -34,13 +36,13 @@
             CreateButtonsGroupBox();
 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(500, 600);
+            this.ClientSize = new System.Drawing.Size(800, 600);
             this.Text = "PCInsight";
             this.Icon = new Icon("assets/logo.ico");
             this.Controls.Add(this.menuStrip);
-            this.MainMenuStrip = this.menuStrip;
             this.ResumeLayout(false);
             this.PerformLayout();
+            dataGrid.SelectionChanged += datagridview_UserInteraction; // removing selection highlights from datagridview
         }
 
         private void InitializeMenuStrip()
@@ -72,11 +74,13 @@
         }
         private void SaveMenuItem_Click(object sender, EventArgs e)
         {
+            
             MessageBox.Show("Pending Feature", "Save data locally", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
-        private void UploadMenuItem_Click(object sender, EventArgs e)
+        private async void UploadMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Pending Feature", "Upload data to server", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            await rm.SendToServer();
+            MessageBox.Show("Data uploaded to the server", "Upload data", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
 
@@ -84,7 +88,7 @@
         {
             this.table.AutoSize = false;
             this.table.ColumnCount = 1;
-            this.table.RowCount = 3;
+            this.table.RowCount = 4;
             this.table.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.table.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.table.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 45F));
@@ -133,24 +137,71 @@
             TableLayoutPanel gpuTable = new TableLayoutPanel
             {
                 AutoSize = false,
-                ColumnCount = 2,
-                RowCount = 2,
+                ColumnCount = 3,
+                RowCount = 1,
                 Dock = DockStyle.Fill
             };
-            gpuTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            gpuTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            gpuTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 35F));
+            gpuTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 35F));
+            gpuTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30F));
             
-
             this.gpuUsageCanvas = new SkiaSharp.Views.Desktop.SKControl { Dock = DockStyle.Fill };
             this.gpuTemperatureCanvas = new SkiaSharp.Views.Desktop.SKControl { Dock = DockStyle.Fill };
 
-            gpuTable.Controls.Add(gpuUsageHeading, 0, 0);
-            gpuTable.Controls.Add(gpuTempHeading, 1, 0);
-            gpuTable.Controls.Add(this.gpuUsageCanvas, 0, 1);
-            gpuTable.Controls.Add(this.gpuTemperatureCanvas, 1, 1);
+            dataGrid.Columns[0].Name = "Sensor";
+            dataGrid.Columns[1].Name = "Value";
+            dataGrid.Rows[0].Cells[0].Value = "VRAM Used";
+            dataGrid.Rows[0].Cells[1].Value = "Value 1-2";
+            dataGrid.Rows[1].Cells[0].Value = "Core Clock";
+            dataGrid.Rows[1].Cells[1].Value = "Value 2-2";
+            dataGrid.Rows[2].Cells[0].Value = "Memory Clock";
+            dataGrid.Rows[2].Cells[1].Value = "Value 3-2";
+
+            gpuTable.Controls.Add(dataGrid, 2, 0);
+            //gpuTable.Controls.Add(gpuUsageHeading, 0, 0);
+            //gpuTable.Controls.Add(gpuTempHeading, 1, 0);
+            gpuTable.Controls.Add(this.gpuUsageCanvas, 0, 0);
+            gpuTable.Controls.Add(this.gpuTemperatureCanvas, 1, 0);
 
             gpuGroupBox.Controls.Add(gpuTable);
+
             return gpuGroupBox;
+        }
+        Label overlayLabel = new Label
+        {
+            Text = "Overlay Label",
+            BackColor = Color.FromArgb(0, Color.Yellow), // Semi-transparent yellow background
+            Dock = DockStyle.Fill,
+            TextAlign = ContentAlignment.MiddleCenter,
+        };
+
+        public DataGridView dataGrid = new DataGridView
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 2,
+            RowCount = 3,
+            ReadOnly = true, // Prevent editing
+            AutoSize = true,
+            RowHeadersVisible = false,
+            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+            AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells,
+            AllowUserToResizeColumns = false, 
+            AllowUserToResizeRows = false, 
+            ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing,
+            CellBorderStyle = DataGridViewCellBorderStyle.Single, 
+            BorderStyle = BorderStyle.None,
+            BackgroundColor = Color.FromArgb(255, 240, 240, 240),
+            DefaultCellStyle = { BackColor = Color.FromArgb(255, 240, 240, 240) },
+            EnableHeadersVisualStyles = false,
+            ColumnHeadersDefaultCellStyle = { BackColor = Color.FromArgb(255, 240, 240, 240) },
+         };
+        private void datagridview_UserInteraction(object sender, EventArgs e)
+        {
+            dataGrid.ClearSelection();
+            for (int i = 0; i < dataGrid.ColumnCount; i++)
+            {
+                dataGrid.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
+            }
         }
 
         private GroupBox CreateCpuGroupBox()
@@ -162,14 +213,15 @@
                 RowCount = 2,
                 Dock = DockStyle.Fill,
             };
-            cpuTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            cpuTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            cpuTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 40F));
+            cpuTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 40F));
+            cpuTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
 
             this.cpuUsageCanvas = new SkiaSharp.Views.Desktop.SKControl { Dock = DockStyle.Fill };
             this.cpuTemperatureCanvas = new SkiaSharp.Views.Desktop.SKControl { Dock = DockStyle.Fill };
-
-            cpuTable.Controls.Add(cpuUsageHeading, 0, 0);
-            cpuTable.Controls.Add(cpuTempHeading, 1, 0);
+            
+            //cpuTable.Controls.Add(cpuUsageHeading, 0, 0);
+            //cpuTable.Controls.Add(cpuTempHeading, 1, 0);
             cpuTable.Controls.Add(this.cpuUsageCanvas, 0, 1);
             cpuTable.Controls.Add(this.cpuTemperatureCanvas, 1, 1);
 
@@ -180,7 +232,7 @@
         private GroupBox gpuGroupBox = new GroupBox
         {
             Text = "Gathering GPU information....",
-            Dock = DockStyle.Fill
+            Dock = DockStyle.Fill,
         };
         private GroupBox cpuGroupBox = new GroupBox
         {

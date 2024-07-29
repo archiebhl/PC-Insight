@@ -3,14 +3,14 @@ using SkiaSharp;
 using SkiaSharp.Views.Desktop;
 using Timer = System.Windows.Forms.Timer;
 
-namespace PCInsight.Client
+namespace client
 {
     public partial class Form1 : Form
     {
         private ResourceMonitor rm = new ResourceMonitor();
         private Timer updateTimer = new Timer
         {
-            Interval = 2000 // 2 second(s)
+            Interval = 1000 // 2 second(s)
         };
         private Plot gpuUsagePlot = new();
         private Plot gpuTemperaturePlot = new();
@@ -23,6 +23,7 @@ namespace PCInsight.Client
             InitializeComponent();
             InitializePlot();
             UpdateData(); // first run to gather component info
+            UpdateData(); // must be run twice for the labels to appear?
         }
 
         private void StartButton_Click(object sender, EventArgs e)
@@ -60,7 +61,7 @@ namespace PCInsight.Client
             }
         }
 
-        private async void UpdateData()
+        private async Task UpdateData()
         {
             await Task.Run(() =>
             {
@@ -77,15 +78,18 @@ namespace PCInsight.Client
                     gpuUsageHeading.Text = string.Format("Usage: {0}%", rm.GPU_USAGE);
                     gpuTempHeading.Text = string.Format("Temperature: {0}°C", rm.GPU_TEMP);
 
-                    UpdateGraph(gpuUsagePlot, rm.gpuUsageData, gpuUsageCanvas);
-                    UpdateGraph(gpuTemperaturePlot, rm.gpuTemperatureData, gpuTemperatureCanvas);
-                    UpdateGraph(cpuUsagePlot, rm.cpuUsageData, cpuUsageCanvas);
-                    UpdateGraph(cpuTemperaturePlot, rm.cpuTemperatureData, cpuTemperatureCanvas);
+                    dataGrid.Rows[0].Cells[1].Value = string.Format("{0} / {1} GB\n",rm.GPU_VRAM_CURRENT, rm.GPU_VRAM_MAX);
+                    dataGrid.Rows[1].Cells[1].Value = string.Format("{0} MHz\n",rm.GPU_CORE_CLOCK);
+                    dataGrid.Rows[2].Cells[1].Value = string.Format("{0} MHz\n",rm.GPU_MEMORY_CLOCK);
+
+                    UpdateGraph(gpuUsagePlot, rm.gpuUsageData, gpuUsageCanvas, rm.GPU_USAGE, "Usage");
+                    UpdateGraph(gpuTemperaturePlot, rm.gpuTemperatureData, gpuTemperatureCanvas, rm.GPU_TEMP, "Temperature");
+                    UpdateGraph(cpuUsagePlot, rm.cpuUsageData, cpuUsageCanvas, rm.CPU_USAGE, "Usage");
+                    UpdateGraph(cpuTemperaturePlot, rm.cpuTemperatureData, cpuTemperatureCanvas, rm.CPU_TEMP, "Temperature");
                 }));
             });
         }
-
-        private void UpdateGraph(Plot plot, List<double> dataList, SKControl skControl)
+        private void UpdateGraph(Plot plot, List<double> dataList, SKControl skControl, double value, string measurement)
         {
             double[] dataArray = dataList.ToArray();
             plot.Clear();
@@ -101,6 +105,11 @@ namespace PCInsight.Client
 
                     plot.Render(canvas, skControl.Width, skControl.Height);
                     plot.Axes.AutoScaleExpandX();
+                    plot.Axes.Title.Label.Text = string.Format("{0}: {1}%", measurement, value);
+                    plot.Axes.Title.Label.FontSize = 13;
+                    plot.Axes.Title.Label.OffsetY = -10;
+                    plot.Axes.Title.Label.FontName = "MS Sans Serif";
+                    plot.Axes.Top.MaximumSize = 0;
                 };
 
                 skControl.Dock = DockStyle.Fill;

@@ -1,4 +1,4 @@
-namespace PCInsight.Client
+namespace client
 {
     static class Program
     {
