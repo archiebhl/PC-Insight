@@ -2,7 +2,7 @@
 
 A program to monitor the real-time temperature and usage data of PC components. 
 
-![](https://github.com/axshb/PC-Insight/blob/master/GUI.png?raw=true)
+![](https://github.com/archiebhl/PC-Insight/blob/master/assets/GUI.png?raw=true)
 
 
 ## Usage
