@@ -1,6 +1,6 @@
 # PCInsight
 
-A program to monitor the real-time temperature and usage data of PC components. 
+A program to monitor real-time sensor data of PC components. 
 
 ![](https://github.com/archiebhl/PC-Insight/blob/master/assets/GUI.png?raw=true)
 
