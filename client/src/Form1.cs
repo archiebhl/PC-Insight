@@ -71,16 +71,18 @@ namespace client
                 BeginInvoke((MethodInvoker)(() =>
                 {
                     cpuGroupBox.Text = rm.CPU_NAME;
-                    cpuUsageHeading.Text = string.Format("Usage: {0}%", rm.CPU_USAGE);
-                    cpuTempHeading.Text = string.Format("Temperature: {0}°C", rm.CPU_TEMP);
-
                     gpuGroupBox.Text = rm.GPU_NAME;
-                    gpuUsageHeading.Text = string.Format("Usage: {0}%", rm.GPU_USAGE);
-                    gpuTempHeading.Text = string.Format("Temperature: {0}°C", rm.GPU_TEMP);
-
-                    dataGrid.Rows[0].Cells[1].Value = string.Format("{0} / {1} GB\n",rm.GPU_VRAM_CURRENT, rm.GPU_VRAM_MAX);
-                    dataGrid.Rows[1].Cells[1].Value = string.Format("{0} MHz\n",rm.GPU_CORE_CLOCK);
-                    dataGrid.Rows[2].Cells[1].Value = string.Format("{0} MHz\n",rm.GPU_MEMORY_CLOCK);
+                    
+                    gpuDataGrid.Rows.Clear();
+                    foreach (var kvp in rm.gpuExtraInfo)
+                    {
+                        gpuDataGrid.Rows.Add(kvp.Key, kvp.Value);
+                    }
+                    cpuDataGrid.Rows.Clear();
+                    foreach (var kvp in rm.cpuExtraInfo)
+                    {
+                        cpuDataGrid.Rows.Add(kvp.Key, kvp.Value);
+                    }
 
                     UpdateGraph(gpuUsagePlot, rm.gpuUsageData, gpuUsageCanvas, rm.GPU_USAGE, "Usage");
                     UpdateGraph(gpuTemperaturePlot, rm.gpuTemperatureData, gpuTemperatureCanvas, rm.GPU_TEMP, "Temperature");

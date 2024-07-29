@@ -33,19 +33,18 @@ namespace client
         public List<double> gpuVramUsageData = new List<double>();
         public List<double> cpuUsageData = new List<double>();
         public List<double> cpuTemperatureData = new List<double>();
-        public List<Dictionary<string, double>> cpuClockData = new List<Dictionary<string, double>>();
         public string? GPU_NAME;
         public string? CPU_NAME;
         private DataSender dataSender = new DataSender();
         private Guid clientId = Guid.NewGuid();
-        public double GPU_CORE_CLOCK;
-        public double GPU_MEMORY_CLOCK;
+        public Dictionary<string, string> gpuExtraInfo = new Dictionary<string, string>();
+        public Dictionary<string, string> cpuExtraInfo = new Dictionary<string, string>();
 
         public async Task SendToServer()
         {
             await dataSender.SendDataAsync(cpuUsageData, cpuTemperatureData, gpuUsageData, gpuTemperatureData, clientId);
         }
-
+        
         public void Monitor()
         {
             Computer computer = new Computer
@@ -87,6 +86,8 @@ namespace client
             Debug.Flush();
         }
 
+
+
         private void CollectCpuData(Computer computer)
         {
             foreach (IHardware hardware in computer.Hardware)
@@ -99,7 +100,6 @@ namespace client
                     foreach (ISensor sensor in hardware.Sensors)
                     {
                         double sensorValue = sensor.Value.HasValue ? (double)Math.Round(sensor.Value.Value, 0) : 0;
-
                         if (sensor.SensorType.ToString().Equals("Temperature") && sensor.Name.ToString().Equals("Core Average"))
                         {
                             CPU_TEMP = sensorValue;
@@ -110,23 +110,18 @@ namespace client
                             CPU_USAGE = sensorValue;
                             cpuUsageData.Add(CPU_USAGE);
                         }
-                        else if (sensor.SensorType.ToString().Equals("Load"))
-                        {
-                            clockData[sensor.Name] = sensorValue;
+                        else
+                        {       
+                            string units = getUnits(sensor);                     
+                            cpuExtraInfo[sensor.Name] = string.Format("{0}{1}", sensorValue, units);
                         }
-                    }
-
-                    if (clockData.Count > 0)
-                    {
-                        CPU_CLOCKS = clockData;
-                        cpuClockData.Add(clockData);
                     }
                 }
             }
         }
 
         private void CollectGpuData(Computer computer)
-        {
+        {   
             foreach (IHardware hardware in computer.Hardware)
             {
                 if (hardware.HardwareType.ToString().Contains("Gpu"))
@@ -149,26 +144,64 @@ namespace client
                             GPU_USAGE = sensorValue;
                             gpuUsageData.Add(GPU_USAGE);
                         }
-                        else if (sensor.SensorType.ToString().Equals("SmallData") && sensor.Name.ToString().Equals("GPU Memory Used"))
-                        {
-                            GPU_VRAM_CURRENT = sensorValue;
-                            gpuVramUsageData.Add(GPU_VRAM_CURRENT);
-                        }
-                        else if (sensor.SensorType.ToString().Equals("SmallData") && sensor.Name.ToString().Equals("GPU Memory Total"))
-                        {
-                            GPU_VRAM_MAX = sensorValue;
-                        }
-                        else if (sensor.SensorType.ToString().Equals("Clock") && sensor.Name.ToString().Equals("GPU Core"))
-                        {
-                            GPU_CORE_CLOCK = sensorValue;
-                        }
-                        else if (sensor.SensorType.ToString().Equals("Clock") && sensor.Name.ToString().Equals("GPU Memory"))
-                        {
-                            GPU_MEMORY_CLOCK = sensorValue;
+                        else
+                        {       
+                            string units = getUnits(sensor);                     
+                            gpuExtraInfo[sensor.Name] = string.Format("{0}{1}", sensorValue, units);
                         }
                     }
                 }
             }
+        }
+
+        private string getUnits(ISensor sensor)
+        {
+            switch (sensor.SensorType.ToString())
+            {
+                case "Temperature":
+                    return "°C";
+                case "Clock":
+                    return " MHz";
+                case "Fan":
+                    return " RPM";
+                case "Control":
+                    return "%";
+                case "Load":
+                    return "%";
+                case "SmallData":
+                    return " MB";
+                case "Power":
+                    return "";
+                case "Throughput":
+                    return " B/s";
+                case "Voltage":
+                    return " V";
+                default:
+                    return "";
+            }
+        }
+
+        private enum SensorType
+        {
+            Voltage, // V
+            Current, // A
+            Power, // W
+            Clock, // MHz
+            Temperature, // °C
+            Load, // %
+            Frequency, // Hz
+            Fan, // RPM
+            Flow, // L/h
+            Control, // %
+            Level, // %
+            Factor, // 1
+            Data, // GB = 2^30 Bytes
+            SmallData, // MB = 2^20 Bytes
+            Throughput, // B/s
+            TimeSpan, // Seconds 
+            Energy, // milliwatt-hour (mWh)
+            Noise, // dBA
+            Humidity // %
         }
     }
 }

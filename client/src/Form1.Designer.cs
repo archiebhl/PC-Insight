@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.Tracing;
+using System.Runtime.ExceptionServices;
 
 namespace client
 {
@@ -36,13 +37,14 @@ namespace client
             CreateButtonsGroupBox();
 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 600);
+            this.ClientSize = new System.Drawing.Size(850, 600);
             this.Text = "PCInsight";
             this.Icon = new Icon("assets/logo.ico");
             this.Controls.Add(this.menuStrip);
             this.ResumeLayout(false);
             this.PerformLayout();
-            dataGrid.SelectionChanged += datagridview_UserInteraction; // removing selection highlights from datagridview
+            gpuDataGrid.SelectionChanged += datagridview_UserInteraction; 
+            cpuDataGrid.SelectionChanged += datagridview_UserInteraction;
         }
 
         private void InitializeMenuStrip()
@@ -148,18 +150,10 @@ namespace client
             this.gpuUsageCanvas = new SkiaSharp.Views.Desktop.SKControl { Dock = DockStyle.Fill };
             this.gpuTemperatureCanvas = new SkiaSharp.Views.Desktop.SKControl { Dock = DockStyle.Fill };
 
-            dataGrid.Columns[0].Name = "Sensor";
-            dataGrid.Columns[1].Name = "Value";
-            dataGrid.Rows[0].Cells[0].Value = "VRAM Used";
-            dataGrid.Rows[0].Cells[1].Value = "Value 1-2";
-            dataGrid.Rows[1].Cells[0].Value = "Core Clock";
-            dataGrid.Rows[1].Cells[1].Value = "Value 2-2";
-            dataGrid.Rows[2].Cells[0].Value = "Memory Clock";
-            dataGrid.Rows[2].Cells[1].Value = "Value 3-2";
-
-            gpuTable.Controls.Add(dataGrid, 2, 0);
-            //gpuTable.Controls.Add(gpuUsageHeading, 0, 0);
-            //gpuTable.Controls.Add(gpuTempHeading, 1, 0);
+            gpuDataGrid.Columns[0].Name = "Sensor";
+            gpuDataGrid.Columns[1].Name = "Value";
+            
+            gpuTable.Controls.Add(gpuDataGrid, 2, 0);
             gpuTable.Controls.Add(this.gpuUsageCanvas, 0, 0);
             gpuTable.Controls.Add(this.gpuTemperatureCanvas, 1, 0);
 
@@ -167,67 +161,77 @@ namespace client
 
             return gpuGroupBox;
         }
-        Label overlayLabel = new Label
-        {
-            Text = "Overlay Label",
-            BackColor = Color.FromArgb(0, Color.Yellow), // Semi-transparent yellow background
-            Dock = DockStyle.Fill,
-            TextAlign = ContentAlignment.MiddleCenter,
-        };
 
-        public DataGridView dataGrid = new DataGridView
+        public DataGridView gpuDataGrid = new DataGridView
         {
             Dock = DockStyle.Fill,
             ColumnCount = 2,
-            RowCount = 3,
-            ReadOnly = true, // Prevent editing
-            AutoSize = true,
+            ReadOnly = true, 
+            AutoSize = false,
             RowHeadersVisible = false,
-            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells,
             AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells,
             AllowUserToResizeColumns = false, 
             AllowUserToResizeRows = false, 
             ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing,
-            CellBorderStyle = DataGridViewCellBorderStyle.Single, 
+            ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None,
+            CellBorderStyle = DataGridViewCellBorderStyle.None, 
             BorderStyle = BorderStyle.None,
             BackgroundColor = Color.FromArgb(255, 240, 240, 240),
             DefaultCellStyle = { BackColor = Color.FromArgb(255, 240, 240, 240) },
             EnableHeadersVisualStyles = false,
             ColumnHeadersDefaultCellStyle = { BackColor = Color.FromArgb(255, 240, 240, 240) },
+            ScrollBars = ScrollBars.Both,
          };
-        private void datagridview_UserInteraction(object sender, EventArgs e)
-        {
-            dataGrid.ClearSelection();
-            for (int i = 0; i < dataGrid.ColumnCount; i++)
-            {
-                dataGrid.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
-            }
-        }
 
         private GroupBox CreateCpuGroupBox()
         {
             TableLayoutPanel cpuTable = new TableLayoutPanel
             {
                 AutoSize = false,
-                ColumnCount = 2,
-                RowCount = 2,
+                ColumnCount = 3,
+                RowCount = 1,
                 Dock = DockStyle.Fill,
             };
-            cpuTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 40F));
-            cpuTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 40F));
-            cpuTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 20F));
+            cpuTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 35F));
+            cpuTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 35F));
+            cpuTable.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 30F));
 
             this.cpuUsageCanvas = new SkiaSharp.Views.Desktop.SKControl { Dock = DockStyle.Fill };
             this.cpuTemperatureCanvas = new SkiaSharp.Views.Desktop.SKControl { Dock = DockStyle.Fill };
+
+            cpuDataGrid.Columns[0].Name = "Sensor";
+            cpuDataGrid.Columns[1].Name = "Value";
             
-            //cpuTable.Controls.Add(cpuUsageHeading, 0, 0);
-            //cpuTable.Controls.Add(cpuTempHeading, 1, 0);
-            cpuTable.Controls.Add(this.cpuUsageCanvas, 0, 1);
-            cpuTable.Controls.Add(this.cpuTemperatureCanvas, 1, 1);
+            cpuTable.Controls.Add(cpuDataGrid, 2, 0);
+            cpuTable.Controls.Add(this.cpuUsageCanvas, 0, 0);
+            cpuTable.Controls.Add(this.cpuTemperatureCanvas, 1, 0);
 
             cpuGroupBox.Controls.Add(cpuTable);
             return cpuGroupBox;
         }
+
+        public DataGridView cpuDataGrid = new DataGridView
+        {
+            Dock = DockStyle.Fill,
+            ColumnCount = 2,
+            ReadOnly = true, 
+            AutoSize = false,
+            RowHeadersVisible = false,
+            AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells,
+            AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells,
+            AllowUserToResizeColumns = false, 
+            AllowUserToResizeRows = false, 
+            ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing,
+            ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.None,
+            CellBorderStyle = DataGridViewCellBorderStyle.None, 
+            BorderStyle = BorderStyle.None,
+            BackgroundColor = Color.FromArgb(255, 240, 240, 240),
+            DefaultCellStyle = { BackColor = Color.FromArgb(255, 240, 240, 240) },
+            EnableHeadersVisualStyles = false,
+            ColumnHeadersDefaultCellStyle = { BackColor = Color.FromArgb(255, 240, 240, 240) },
+            ScrollBars = ScrollBars.Both,
+         };
 
         private GroupBox gpuGroupBox = new GroupBox
         {
@@ -239,31 +243,18 @@ namespace client
             Text = "Gathering CPU information....",
             Dock = DockStyle.Fill
         };
-
-        private System.Windows.Forms.Label cpuUsageHeading = new System.Windows.Forms.Label()
+        private void datagridview_UserInteraction(object sender, EventArgs e)
         {
-            Text = "CPU Usage",
-            Dock = DockStyle.Fill,
-            TextAlign = ContentAlignment.MiddleCenter
-        };
-        private System.Windows.Forms.Label cpuTempHeading = new System.Windows.Forms.Label()
-        {
-            Text = "CPU Temperature",
-            Dock = DockStyle.Fill,
-            TextAlign = ContentAlignment.MiddleCenter,
-        };
-        private System.Windows.Forms.Label gpuUsageHeading = new System.Windows.Forms.Label()
-        {
-            Text = "GPU Usage",
-            Dock = DockStyle.Fill,
-            TextAlign = ContentAlignment.MiddleCenter
-        };
-        private System.Windows.Forms.Label gpuTempHeading = new System.Windows.Forms.Label()
-        {
-            Text = "GPU Temperature",
-            Dock = DockStyle.Fill,
-            TextAlign = ContentAlignment.MiddleCenter
-        };
-
+            gpuDataGrid.ClearSelection();
+            for (int i = 0; i < gpuDataGrid.ColumnCount; i++)
+            {
+                gpuDataGrid.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
+            }
+            cpuDataGrid.ClearSelection();
+            for (int i = 0; i < cpuDataGrid.ColumnCount; i++)
+            {
+                cpuDataGrid.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
+            }
+        }
     }
 }
